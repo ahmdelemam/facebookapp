@@ -1,5 +1,5 @@
 <?php
-//git@heroku.com:cubeadv.git
+//git@git.pagodabox.com:ahmdelemam.git
 //App URL http://ahmdelemam.gopagoda.com/
 
 require_once('src/facebook.php');
