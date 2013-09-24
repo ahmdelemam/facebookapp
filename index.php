@@ -41,7 +41,7 @@ $message = 'Photo upload via the PHP SDK!';
                     'message' => 'Photo message',
                     'source' => 'multipart/form-data'
                 );
-                $file = 'app.jpg'; //Example image file
+                $file = 'mypic.jpg'; //Example image file
                 $photo_details['image'] = '@' . realpath($file);
 
                 $upload_photo = $facebook->api('/' . $album_uid . '/photos', 'post', $photo_details);
