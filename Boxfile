@@ -4,7 +4,7 @@ web1:
   ################################################
   php_version: 5.4.14
   php_extensions: [mysqli, curl, gd, mbstring]
-  php_date_timezone: Europe/London
+  php_date_timezone: Africa/Cairo
   php_max_execution_time: 30
   php_max_input_time: 60
   php_post_max_size: 25M
