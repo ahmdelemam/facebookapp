@@ -1,75 +1,65 @@
 <?php
-//git@git.pagodabox.com:ahmdelemam.git
-//App URL http://ahmdelemam.gopagoda.com/
-//The key fingerprint is:  1e:1e:15:d5:a8:43:37:54:6d:ad:08:17:7b:45:5e:21 fat@FAT-PC
-require_once('src/facebook.php');
+  // Remember to copy files from the SDK's src/ directory to a
+  // directory in your application on the server, such as php-sdk/
+  require_once('src/facebook.php');
 
-$config = array(
+  $config = array(
     'appId' => '551590664908056',
     'secret' => 'e3b02355ca192eea751ba392810b3068',
     'fileUpload' => true,
-);
+  );
 
-$facebook = new Facebook($config);
-$user_id = $facebook->getUser();
+  $facebook = new Facebook($config);
+  $user_id = $facebook->getUser();
 
-$photo = './mypic.jpg'; // Path to the photo on the local filesystem
-$message = 'Photo upload via the PHP SDK!';
+  $photo = './mypic.jpg'; // Path to the photo on the local filesystem
+  $message = 'Photo upload via the PHP SDK!';
 ?>
 <html>
-    <head></head>
-    <body>
+  <head></head>
+  <body>
 
-        <?php
-        if ($user_id) {
+  <?php
+    if($user_id) {
 
-            // We have a user ID, so probably a logged in user.
-            // If not, we'll get an exception, which we handle below.
-            try {
-                //Create an album
-                $album_details = array(
-                    'message' => 'The description of the album', // The description of the album from our form
-                    'name' => 'Album name', // any Album name from our form
-                );
-                $create_album = $facebook->api('/me/albums', 'post', $album_details);
+      // We have a user ID, so probably a logged in user.
+      // If not, we'll get an exception, which we handle below.
+      try {
 
-                //Get album ID of the album you've just created
-                $album_uid = $create_album['id'];
+        // Upload to a user's profile. The photo will be in the
+        // first album in the profile. You can also upload to
+        // a specific album by using /ALBUM_ID as the path 
+        $ret_obj = $facebook->api('/me/photos', 'POST', array(
+                                         'source' => '@' . $photo,
+                                         'message' => $message,
+                                         )
+                                      );
+        echo '<pre>Photo ID: ' . $ret_obj['id'] . '</pre>';
+        echo '<br /><a href="' . $facebook->getLogoutUrl() . '">logout</a>';
+      } catch(FacebookApiException $e) {
+        // If the user is logged out, you can have a 
+        // user ID even though the access token is invalid.
+        // In this case, we'll get an exception, so we'll
+        // just ask the user to login again here.
+        $login_url = $facebook->getLoginUrl( array(
+                       'scope' => 'photo_upload'
+                       )); 
+        echo 'Please <a href="' . $login_url . '">login.</a>';
+        error_log($e->getType());
+        error_log($e->getMessage());
+      }   
+    } else {
 
-                //Upload a photo to album of ID...
-                $photo_details = array(
-                    'message' => 'Photo message',
-                    'source' => 'multipart/form-data'
-                );
-                $file = 'mypic.jpg'; //Example image file
-                $photo_details['image'] = '@' . realpath($file);
+      // No user, print a link for the user to login
+      // To upload a photo to a user's wall, we need photo_upload  permission
+      // We'll use the current URL as the redirect_uri, so we don't
+      // need to specify it here.
+      $login_url = $facebook->getLoginUrl( array( 'scope' => 'photo_upload') );
+      echo 'Please <a href="' . $login_url . '">login.</a>';
 
-                $upload_photo = $facebook->api('/' . $album_uid . '/photos', 'post', $photo_details);
+    }
 
-                $ret_obj = $facebook->api('/me/photos', 'POST', array(
-                    'source' => '@' . $photo,
-                    'message' => $message,
-                        )
-                );
-                echo '<br /><a href="' . $facebook->getLogoutUrl() . '">logout</a>';
-            } catch (FacebookApiException $e) {
-                // If the user is logged out, you can have a user ID even though the access token is invalid.
-                // In this case, we'll get an exception, so we'll just ask the user to login again here.
-                $login_url = $facebook->getLoginUrl(array(
-                    'scope' => 'access_token'
-                ));
-                echo 'Please <a href="' . $login_url . '">login.</a>';
-                error_log($e->getType());
-                error_log($e->getMessage());
-            }
-        } else {
+  ?>
 
-            // To upload a photo to a user's wall, we need photo_upload  permission
-            // We'll use the current URL as the redirect_uri, so we don't
-            $login_url = $facebook->getLoginUrl(array('scope' => 'photo_upload, access_token, user_photos, friends_photos'));
-            echo 'Please <a href="' . $login_url . '">login.</a>';
-        }
-        ?>
-
-    </body>
+  </body>
 </html>
