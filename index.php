@@ -2,7 +2,7 @@
 //git@heroku.com:cubeadv.git
 //App URL http://cubeadv.herokuapp.com/
 
-require_once('php-sdk/facebook.php');
+require_once('src/facebook.php');
 
 $config = array(
     'appId' => '551590664908056',
