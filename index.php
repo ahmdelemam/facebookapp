@@ -1,65 +1,71 @@
 <?php
-  // Remember to copy files from the SDK's src/ directory to a
-  // directory in your application on the server, such as php-sdk/
-  require_once('src/facebook.php');
 
-  $config = array(
-    'appId' => '551590664908056',
-    'secret' => 'e3b02355ca192eea751ba392810b3068',
-    'fileUpload' => true,
-  );
+$app_id = "551590664908056";
+$app_secret = "e3b02355ca192eea751ba392810b3068";
+$post_login_url = "https://apps.facebook.com/ahmdelemam/";
+$album_name = 'YOUR_ALBUM_NAME';//get it from our form
+$album_description = 'YOUR_ALBUM_DESCRIPTION';//get it from our form
 
-  $facebook = new Facebook($config);
-  $user_id = $facebook->getUser();
+$code = $_REQUEST["code"];
 
-  $photo = './mypic.jpg'; // Path to the photo on the local filesystem
-  $message = 'Photo upload via the PHP SDK!';
+//Obtain the access_token with publish_stream permission 
+if (empty($code)) {
+    $dialog_url = "http://www.facebook.com/dialog/oauth?"
+            . "client_id=" . $app_id
+            . "&redirect_uri=" . urlencode($post_login_url)
+            . "&scope=publish_stream";
+    echo("<script>top.location.href='" . $dialog_url .
+    "'</script>");
+} else {
+    $token_url = "https://graph.facebook.com/oauth/"
+            . "access_token?"
+            . "client_id=" . $app_id
+            . "&redirect_uri=" . urlencode($post_login_url)
+            . "&client_secret=" . $app_secret
+            . "&code=" . $code;
+    $response = file_get_contents($token_url);
+    $params = null;
+    parse_str($response, $params);
+    $access_token = $params['access_token'];
+
+    // Create a new album
+    $graph_url = "https://graph.facebook.com/me/albums?"
+            . "access_token=" . $access_token;
+
+    $postdata = http_build_query(
+            array(
+                'name' => $album_name,
+                'message' => $album_description
+            )
+    );
+    $opts = array('http' =>
+        array(
+            'method' => 'POST',
+            'header' =>
+            'Content-type: application/x-www-form-urlencoded',
+            'content' => $postdata
+        )
+    );
+    $context = stream_context_create($opts);
+    $result = json_decode(file_get_contents($graph_url, false, $context));
+
+    // Get the new album ID
+    $album_id = $result->id;
+
+    //Show photo upload form and post to the Graph URL
+    $graph_url = "https://graph.facebook.com/" . $album_id
+            . "/photos?access_token=" . $access_token;
+    echo '<html><body>';
+    echo '<form enctype="multipart/form-data" action="'
+    . $graph_url . ' "method="POST">';
+    echo 'Adding photo to album: ' . $album_name . '<br/><br/>';
+    echo 'Please choose a photo: ';
+    echo '<input name="source" type="file"><br/><br/>';
+    echo 'Say something about this photo: ';
+    echo '<input name="message" type="text"
+            value=""><br/><br/>';
+    echo '<input type="submit" value="Upload" /><br/>';
+    echo '</form>';
+    echo '</body></html>';
+}
 ?>
-<html>
-  <head></head>
-  <body>
-
-  <?php
-    if($user_id) {
-
-      // We have a user ID, so probably a logged in user.
-      // If not, we'll get an exception, which we handle below.
-      try {
-
-        // Upload to a user's profile. The photo will be in the
-        // first album in the profile. You can also upload to
-        // a specific album by using /ALBUM_ID as the path 
-        $ret_obj = $facebook->api('/me/photos', 'POST', array(
-                                         'source' => '@' . $photo,
-                                         'message' => $message,
-                                         )
-                                      );
-        echo '<pre>Photo ID: ' . $ret_obj['id'] . '</pre>';
-        echo '<br /><a href="' . $facebook->getLogoutUrl() . '">logout</a>';
-      } catch(FacebookApiException $e) {
-        // If the user is logged out, you can have a 
-        // user ID even though the access token is invalid.
-        // In this case, we'll get an exception, so we'll
-        // just ask the user to login again here.
-        $login_url = $facebook->getLoginUrl( array(
-                       'scope' => 'photo_upload'
-                       )); 
-        echo 'Please <a href="' . $login_url . '">login.</a>';
-        error_log($e->getType());
-        error_log($e->getMessage());
-      }   
-    } else {
-
-      // No user, print a link for the user to login
-      // To upload a photo to a user's wall, we need photo_upload  permission
-      // We'll use the current URL as the redirect_uri, so we don't
-      // need to specify it here.
-      $login_url = $facebook->getLoginUrl( array( 'scope' => 'photo_upload') );
-      echo 'Please <a href="' . $login_url . '">login.</a>';
-
-    }
-
-  ?>
-
-  </body>
-</html>
