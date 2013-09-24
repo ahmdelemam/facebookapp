@@ -1,6 +1,6 @@
 <?php
 //git@heroku.com:cubeadv.git
-//App URL http://cubeadv.herokuapp.com/
+//App URL http://ahmdelemam.gopagoda.com/
 
 require_once('src/facebook.php');
 
@@ -53,10 +53,8 @@ $message = 'Photo upload via the PHP SDK!';
                 );
                 echo '<br /><a href="' . $facebook->getLogoutUrl() . '">logout</a>';
             } catch (FacebookApiException $e) {
-                // If the user is logged out, you can have a 
-                // user ID even though the access token is invalid.
-                // In this case, we'll get an exception, so we'll
-                // just ask the user to login again here.
+                // If the user is logged out, you can have a user ID even though the access token is invalid.
+                // In this case, we'll get an exception, so we'll just ask the user to login again here.
                 $login_url = $facebook->getLoginUrl(array(
                     'scope' => 'photo_upload, access_token, user_photos, friends_photos'
                 ));
