@@ -1,7 +1,7 @@
 <?php
 //git@git.pagodabox.com:ahmdelemam.git
 //App URL http://ahmdelemam.gopagoda.com/
-
+//The key fingerprint is:  1e:1e:15:d5:a8:43:37:54:6d:ad:08:17:7b:45:5e:21 fat@FAT-PC
 require_once('src/facebook.php');
 
 $config = array(
