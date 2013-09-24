@@ -56,7 +56,7 @@ $message = 'Photo upload via the PHP SDK!';
                 // If the user is logged out, you can have a user ID even though the access token is invalid.
                 // In this case, we'll get an exception, so we'll just ask the user to login again here.
                 $login_url = $facebook->getLoginUrl(array(
-                    'scope' => 'photo_upload, access_token, user_photos, friends_photos'
+                    'scope' => 'access_token'
                 ));
                 echo 'Please <a href="' . $login_url . '">login.</a>';
                 error_log($e->getType());
