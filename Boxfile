@@ -1,4 +1,3 @@
-# PHP Extensions available for PHP 5.4.14
 php_extensions:
   - amqp
   - apm
